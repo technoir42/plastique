@@ -51,12 +51,32 @@ class ContentStateController private constructor() {
     }
 
     constructor(
+        fragment: Fragment,
+        contentView: View,
+        progressView: View? = null,
+        emptyView: View? = null
+    ) : this() {
+        addListener(ContentStateApplier(contentView, progressView, emptyView))
+        registerIdlingResource(fragment.viewLifecycleOwner, fragment.javaClass.simpleName)
+    }
+
+    constructor(
         activity: FragmentActivity,
         @IdRes contentViewId: Int,
         @IdRes progressViewId: Int = View.NO_ID,
         @IdRes emptyViewId: Int = View.NO_ID
     ) : this() {
         addListener(ContentStateApplier(activity.window.decorView, contentViewId, progressViewId, emptyViewId))
+        registerIdlingResource(activity, activity.javaClass.simpleName)
+    }
+
+    constructor(
+        activity: FragmentActivity,
+        contentView: View,
+        progressView: View? = null,
+        emptyView: View? = null
+    ) : this() {
+        addListener(ContentStateApplier(contentView, progressView, emptyView))
         registerIdlingResource(activity, activity.javaClass.simpleName)
     }
 
@@ -152,15 +172,21 @@ class ContentStateController private constructor() {
 }
 
 private class ContentStateApplier(
-    rootView: View,
-    @IdRes contentViewId: Int,
-    @IdRes progressViewId: Int,
-    @IdRes emptyViewId: Int
+    private val contentView: View,
+    private val progressView: View?,
+    private val emptyView: View?
 ) : ContentStateController.OnSwitchStateListener {
 
-    private val contentView = requireViewById<View>(rootView, contentViewId)
-    private val progressView = if (progressViewId != View.NO_ID) requireViewById<View>(rootView, progressViewId) else null
-    private val emptyView = if (emptyViewId != View.NO_ID) requireViewById<View>(rootView, emptyViewId) else null
+    constructor(
+        rootView: View,
+        @IdRes contentViewId: Int,
+        @IdRes progressViewId: Int,
+        @IdRes emptyViewId: Int
+    ) : this(
+        contentView = requireViewById<View>(rootView, contentViewId),
+        progressView = if (progressViewId != View.NO_ID) requireViewById<View>(rootView, progressViewId) else null,
+        emptyView = if (emptyViewId != View.NO_ID) requireViewById<View>(rootView, emptyViewId) else null
+    )
 
     override fun onSwitchState(state: ContentState, animated: Boolean) {
         contentView.setVisible(state == ContentState.Content, animated)

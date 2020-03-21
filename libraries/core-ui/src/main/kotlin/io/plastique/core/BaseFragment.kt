@@ -8,8 +8,7 @@ import io.plastique.inject.BaseActivityComponent
 import io.plastique.inject.BaseFragmentComponent
 import io.plastique.inject.getComponent
 
-abstract class BaseFragment(@LayoutRes contentLayoutId: Int) :
-    Fragment(contentLayoutId),
+abstract class BaseFragment : Fragment(),
     BaseFragmentComponent.Holder,
     DisposableContainer by DisposableContainerImpl() {
 
